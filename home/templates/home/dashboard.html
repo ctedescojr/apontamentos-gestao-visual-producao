@@ -1,0 +1,91 @@
+{% load static %}
+{% load django_bootstrap5 %}
+<!doctype html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
+    {% bootstrap_css %}
+
+    <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+<!--    colunas-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+       <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Ordem por tipo', 'Decorrido', 'Média','Operador'],
+            {% for linhas in dados %}
+                ['{{linhas.tipo}}', {{linhas.decorrido}}, {{linhas.media}},'{{linhas.nome}}'],
+            {% endfor %}
+
+
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Company Performance',
+            subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+<!--    colunas-->
+
+<!--    rosta-->
+     <script type="text/javascript">
+      google.charts.load("current", {packages:["corechart"]});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Task', 'Hours per Day'],
+           {% for linhas in tipo %}
+                ['{{linhas.tipo}}',{{linhas.dcount}}],
+            {% endfor %}
+
+        ]);
+
+        var options = {
+          title: 'Ordens tipo',
+          pieHole: 0.4,
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+        chart.draw(data, options);
+      }
+    </script>
+<!--rosca-->
+</head>
+<body>
+{% include 'home/menu.html' %}
+<div class="container">
+    <h3>DASHBOARD</h3>
+
+    {% if dados %}
+    {% for linhas in dados %}
+    Oper. {{linhas.nome}}, Média {{linhas.media}}, Decorrido - {{linhas.decorrido}}<br>
+    {% endfor%}
+    {% endif %}
+
+    {% if dados %}
+        {% for linhas in tipo %}
+        Oper. {{linhas.tipo}}<br>
+        Oper. {{linhas.dcount}}<br>
+        {% endfor%}
+    {% endif %}
+
+    <div id="columnchart_material" style="width: 800px; height: 500px;"></div>
+
+     <div id="donutchart" style="width: 900px; height: 500px;"></div>
+
+</div>
+</body>

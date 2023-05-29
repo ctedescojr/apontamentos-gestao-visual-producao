@@ -1,0 +1,1 @@
+web: gunicorn penachin.wsgi --log-file -

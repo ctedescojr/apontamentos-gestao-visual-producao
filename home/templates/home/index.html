@@ -1,0 +1,268 @@
+{% load tz %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+    <!-- <script type="text/javascript">
+        <meta http-equiv="refresh" content="60; URL=https://penachin.herokuapp.com/">
+    </script> -->
+
+</head>
+{% include 'home/menu.html' %}
+<body onload=" mostar();">
+
+<div style="margin: 0 1rem ">
+    {% bootstrap_messages %}
+    <table class="table table-hover">
+        <thead style="font-weight: bold">
+        <td>Detalhes</td>
+        <td>MÉDIA</td>
+        <td>INÍCIO</td>
+        <td>DECORRIDO</td>
+        <td>STATUS</td>
+        <td>AÇÕES</td>
+        </thead>
+        <tbody id="tbody">
+        {% if dados %}
+        {% for linhas in dados %}
+        {% if linhas.mostrar == '1' %}
+        <tr style="background-color: #faf7f7; ">
+
+            <td>
+                <div style="font-size: 2rem;font-weight: bold">
+                    {{linhas.nome}}
+                </div>
+                <p>OS {{linhas.numeros}} - {{linhas.carro}} - Tipo {{linhas.tipo}} - Etapa {{linhas.fase}} </p>
+            </td>
+            <td style="font-size: 2rem">{{linhas.media}}</td>
+            {% timezone "America/Denver" %}
+                {% localtime on %}
+                <td style="font-size: 2rem">{{linhas.inicio|localtime|date:'H:i'}}</td>
+                {% endlocaltime %}
+            {% endtimezone %}
+            <td style="font-size: 2rem;font-weight: bold">00</td>
+            <td style="font-size: 2rem"> Não iniciado</td>
+            <td>
+                {% if linhas.status == '0' %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Iniciar Etapa 1
+                </button>
+                {% endif %}
+
+                {% if linhas.status == '1' %}
+                <button onclick="Mudarestado()" type="button" class="btn btn-warning btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}}">
+                    Concluir Etapa 1
+                </button>
+                {% endif %}
+                
+                {% if linhas.status == '2' %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Concluir Etapa 2
+                </button>
+                <a class="btn btn-warning btn-lg" href="{% url 'parar' linhas.meuid %}">Pausar</a>
+                </button>
+                {% endif %}
+                
+                {% if linhas.status == '6' %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Inicar Etapa 2
+                </button>
+                {% endif %}
+                
+                {% if linhas.status == '3' %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Inicar Etapa 3
+                </button>
+                {% endif %}
+
+                {% if linhas.status == '4' %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Finalizar
+                </button>
+                <a class="btn btn-warning btn-lg" href="{% url 'parar' linhas.meuid %}">Pausar</a>
+                {% endif %}
+
+                {% if linhas.status == '5' %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Finalizar Após Parada
+                </button>
+                {% endif %}
+
+                {% if linhas.status == '8' %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Retomar Etapa
+                </button>
+                {% endif %}
+
+            </td>
+            <td style="display: none">{{linhas.status}}</td>
+            <td style="display: -moz-box">{{linhas.decorrido}}</td>
+            <td style="display: -moz-box">{{linhas.parado}}</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <h3>Sem Serviços</h3>
+        {% endif %}
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <form method="post" action="{% url 'start' %}">{{ csrf_input }}
+        {% csrf_token %}
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Gestão de Serviços</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+
+
+                        <!--                        outro-->
+                        <div style="text-align: center">
+                            {{linhas.nome}}
+                            <img src="{% static 'images/04.png' %}" alt=""><BR>
+                            Confirma sua ação para:
+                            <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+
+
+                        </div>
+                        <div id="mostrar" style="font-size: 1.6rem">
+                            <!--                            id geral-->
+                            <input type="hidden" name="idetapa" class="form-control" id="recipient-name">
+                            <!--                            dados da ação-->
+                            <div class="form-check form-switch">
+                                <input value="S" name="limpesa" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked">
+                                <label class="form-check-label" for="flexSwitchCheckChecked">Limpeza</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input value="S" name="conserto" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked2">
+                                <label class="form-check-label" for="flexSwitchCheckChecked2">Conserto</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input value="S" name="caixasup" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked3">
+                                <label class="form-check-label" for="flexSwitchCheckChecked3">Caixar Superior</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input value="S" name="caixainf" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked4">
+                                <label class="form-check-label" for="flexSwitchCheckChecked4">Caixar Inferior</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input value="S" name="elemento" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked5">
+                                <label class="form-check-label" for="flexSwitchCheckChecked4">Elemento</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input value="S" name="bocal" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked6">
+                                <label class="form-check-label" for="flexSwitchCheckChecked4">Bocal</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input value="S" name="radiador" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked7">
+                                <label class="form-check-label" for="flexSwitchCheckChecked4">Radiador Novo</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input value="S" name="colmeia" class="form-check-input" type="checkbox"
+                                       id="flexSwitchCheckChecked8">
+                                <label class="form-check-label" for="flexSwitchCheckChecked4">Colmeia</label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg w-75">Confirmar</button>
+                    <button type="button" class="btn btn-warning btn-lg" data-bs-dismiss="modal">Cancelar</button>
+
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+
+</script>
+
+
+</body>
+<script>
+    setTimeout(function () {
+        window.location.reload(1);
+
+    }, 70000);
+    document.getElementById('mostrar').style.display = 'none';
+
+    function Mudarestado(el) {
+        var mostrar = document.getElementById('mostrar').style.display;
+
+        if (mostrar == "none") {
+            document.getElementById('mostrar').style.display = 'block';
+        }
+
+    }
+
+    function esconder(el) {
+        var mostrar = document.getElementById('mostrar').style.display;
+        if (mostrar == "block") {
+            document.getElementById('mostrar').style.display = 'none';
+        }
+    }
+
+    var exampleModal = document.getElementById('exampleModal')
+    exampleModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        var recipient = button.getAttribute('data-bs-whatever')
+        var recipient2 = button.getAttribute('data2-bs-whatever')
+
+        var modalTitle = exampleModal.querySelector('.modal-title')
+        var modalBodyInput = exampleModal.querySelector('.modal-body input')
+        var x = exampleModal.querySelector('.modal-body .x')
+        var m = exampleModal.querySelector('.modal-body .mostrar_form')
+
+
+        modalTitle.textContent = recipient2
+        modalBodyInput.value = recipient
+
+
+    })
+</script>
