@@ -5,7 +5,7 @@ from email.message import EmailMessage
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import Ordem, Etapa
+from .models import Ordem, Etapa, motivoParada
 from django.utils import timezone
 from django.db.models import Count
 
@@ -251,13 +251,28 @@ def atualisa_status(request):
     elif dados.status == '8' and dados.fase == '2' :    #Quando houver uma parada
         dados.retomada = timezone.now()                      #Atualiza o tempo atual
         dados.decorrido = calcula(dados.inicio, dados.parada) - dados.parado
-        dados.parado += calcula(dados.parada, dados.retomada)
+        mParada = motivoParada.objects.get(id=id_etapa)
+        mParada.quantidadeParadas += 1
+        if request.POST.get('almoco'):
+            mParada.almoco = request.POST.get('almoco')
+            dados.parado += 0
+        if request.POST.get('fim_de_turno'):
+            mParada.fim_de_turno = request.POST.get('fim_de_turno')
+            dados.parado += 0
+        if request.POST.get('setup'):
+            mParada.setup = request.POST.get('setup')
+            dados.parado += calcula(dados.parada, dados.retomada)
+        if request.POST.get('outros'):
+            mParada.outros = request.POST.get('outros')
+            dados.parado += calcula(dados.parada, dados.retomada)
+        mParada.save()
         dados.status = '2'
         dados.save()
         id_ordem = dados.id_ordem_id
         final = Ordem.objects.get(base_ptr_id=id_ordem)
         final.status = '1'
         final.save()
+
         messages.success(request, "Etapa dois retomada com sucesso.")
     elif dados.status == '5' and dados.fase == '2' :
         dados.status = '0'

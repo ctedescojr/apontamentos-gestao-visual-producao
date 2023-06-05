@@ -17,16 +17,6 @@ class Modelo(models.Model):
     def __str__(self):
         return self.modelo
 
-class motivoParada(models.Model):
-    mParada = models.CharField(verbose_name='Motivo de Parada', max_length=150)
-
-    class Meta:
-        ordering = ['mParada']
-        verbose_name = 'Motivo de Parada'
-
-    def __str__(self):
-        return self.mParada
-
 class osnumero(models.Model):
 
     class Meta:
@@ -63,7 +53,6 @@ class Funcionario(Base):
 
     def __str__(self):
         return self.nome
-
 
 class Ordem(Base):
 
@@ -126,7 +115,6 @@ class Ordem(Base):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._meta.get_field('numeros').default = self.get_default_numeros
-
 
 class Etapa(Base):
     id_ordem = models.ForeignKey(Ordem, on_delete=models.CASCADE, editable=False)
@@ -191,3 +179,32 @@ class Etapa(Base):
     ), max_length=1, default='0')
     obs_etapa = models.TextField(default='Nada')
 
+class motivoParada(models.Model):
+    mParada = models.CharField(verbose_name='Motivo de Parada', max_length=150)
+
+    class Meta:
+        ordering = ['mParada']
+        verbose_name = 'Motivo de Parada'
+    id_ordem = models.ForeignKey(Ordem, on_delete=models.CASCADE, editable=False)
+    id_etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE, editable=False)
+    quantidadeParadas = models.IntegerField(default=0)
+    almoco = models.CharField(choices=(
+        ('S', 'Sim'),
+        ('N', 'Não'),
+    ), max_length=1, default='N')
+    fim_de_turno = models.CharField(choices=(
+        ('S', 'Sim'),
+        ('N', 'Não'),
+    ), max_length=1, default='N')
+    setup = models.CharField(choices=(
+        ('S', 'Sim'),
+        ('N', 'Não'),
+    ), max_length=1, default='N')
+    outros = models.CharField(choices=(
+        ('S', 'Sim'),
+        ('N', 'Não'),
+    ), max_length=1, default='N')
+    
+
+    def __str__(self):
+        return self.mParada
