@@ -98,6 +98,21 @@ def index(request):
 @login_required
 def parar(request, id):
     dados = Etapa.objects.get(id=id)
+    # mParada = motivoParada.objects.get(id=id)
+    # mParada.quantidadeParadas += 1
+    # if request.POST.get('almoco'):
+    #     mParada.almoco = request.POST.get('almoco')
+    #     dados.parado += 0
+    # if request.POST.get('fim_de_turno'):
+    #     mParada.fim_de_turno = request.POST.get('fim_de_turno')
+    #     dados.parado += 0
+    # if request.POST.get('setup'):
+    #     mParada.setup = request.POST.get('setup')
+    #     dados.parado += calcula(dados.parada, dados.retomada)
+    # if request.POST.get('outros'):
+    #     mParada.outros = request.POST.get('outros')
+    #     dados.parado += calcula(dados.parada, dados.retomada)
+
     dados.status = '8'
     dados.mostrar = '1'
     dados.parada = timezone.now()  #salva o tempo da parada
@@ -206,7 +221,7 @@ def atualisa_status(request):
             final.status = '2'
             final.save()
 
-            messages.success(request, f"Primeira etapa finalizada com sucesso em {dados.fim}")
+            messages.success(request, "Primeira etapa finalizada com sucesso.")
             enviaEmail('2', final.numeros,final, dados)
 #Fim da rotina da primeira etapa
 
@@ -251,22 +266,23 @@ def atualisa_status(request):
     elif dados.status == '8' and dados.fase == '2' :    #Quando houver uma parada
         dados.retomada = timezone.now()                      #Atualiza o tempo atual
         dados.decorrido = calcula(dados.inicio, dados.parada) - dados.parado
-        mParada = motivoParada.objects.get(id=id_etapa)
-        mParada.quantidadeParadas += 1
-        if request.POST.get('almoco'):
-            mParada.almoco = request.POST.get('almoco')
-            dados.parado += 0
-        if request.POST.get('fim_de_turno'):
-            mParada.fim_de_turno = request.POST.get('fim_de_turno')
-            dados.parado += 0
-        if request.POST.get('setup'):
-            mParada.setup = request.POST.get('setup')
-            dados.parado += calcula(dados.parada, dados.retomada)
-        if request.POST.get('outros'):
-            mParada.outros = request.POST.get('outros')
-            dados.parado += calcula(dados.parada, dados.retomada)
-        mParada.save()
-        dados.status = '2'
+        dados.parado += calcula(dados.parada, dados.retomada)
+        # mParada = motivoParada.objects.get(id=id_etapa)
+        # mParada.quantidadeParadas += 1
+        # if request.POST.get('almoco'):
+        #     mParada.almoco = request.POST.get('almoco')
+        #     dados.parado += 0
+        # if request.POST.get('fim_de_turno'):
+        #     mParada.fim_de_turno = request.POST.get('fim_de_turno')
+        #     dados.parado += 0
+        # if request.POST.get('setup'):
+        #     mParada.setup = request.POST.get('setup')
+        #     dados.parado += calcula(dados.parada, dados.retomada)
+        # if request.POST.get('outros'):
+        #     mParada.outros = request.POST.get('outros')
+        #     dados.parado += calcula(dados.parada, dados.retomada)
+        # mParada.save()
+        dados.status = '5'
         dados.save()
         id_ordem = dados.id_ordem_id
         final = Ordem.objects.get(base_ptr_id=id_ordem)
@@ -278,7 +294,7 @@ def atualisa_status(request):
         dados.status = '0'
         dados.mostrar = '0'
         dados.fim = timezone.now()
-        dados.decorrido = calcula(dados.inicio, dados.parada) + calcula(dados.retomada, dados.fim) #Calcula o tempo
+        dados.decorrido = calcula(dados.inicio, dados.fim) - dados.parado #Calcula o tempo
         dados.save()
         id_ordem = dados.id_ordem_id
         final = Ordem.objects.get(base_ptr_id=id_ordem)
@@ -331,7 +347,7 @@ def atualisa_status(request):
         dados.retomada = timezone.now()                        #Resgata o tempo da parada
         dados.decorrido = calcula(dados.inicio, dados.parada) - dados.parado
         dados.parado += calcula(dados.parada, dados.retomada)
-        dados.status = '4'
+        dados.status = '5'
         dados.save()
         id_ordem = dados.id_ordem_id
         final = Ordem.objects.get(base_ptr_id=id_ordem)
@@ -342,14 +358,14 @@ def atualisa_status(request):
         dados.status = '0'
         dados.mostrar = '0'
         dados.fim = timezone.now()
-        dados.decorrido = calcula(dados.inicio, dados.parada) + calcula(dados.retomada, dados.fim) #Calcula o tempo
+        dados.decorrido = calcula(dados.inicio, dados.fim) - dados.parado #Calcula o tempo
         dados.save()
         id_ordem = dados.id_ordem_id
         final = Ordem.objects.get(base_ptr_id=id_ordem)
         final.data_entrega = timezone.now()
         final.status = '3'
         final.save()
-        messages.success(request, "Finalizado")
+        messages.success(request, "Finalizado após parada.")
         enviaEmail('3', final.numeros, final, dados)
     #fim da rotina de parada na etapa 3
 #Fim da rotina da terceira etapa
