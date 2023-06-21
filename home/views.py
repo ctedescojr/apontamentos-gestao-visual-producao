@@ -5,7 +5,7 @@ from email.message import EmailMessage
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import Ordem, Etapa, motivoParada
+from .models import Ordem, Etapa
 from django.utils import timezone
 from django.db.models import Count
 
@@ -97,22 +97,8 @@ def index(request):
 #Função que realiza a pausa durante a execução das etapas
 @login_required
 def parar(request, id):
-    dados = Etapa.objects.get(id=id)
-    # mParada = motivoParada.objects.get(id=id)
-    # mParada.quantidadeParadas += 1
-    # if request.POST.get('almoco'):
-    #     mParada.almoco = request.POST.get('almoco')
-    #     dados.parado += 0
-    # if request.POST.get('fim_de_turno'):
-    #     mParada.fim_de_turno = request.POST.get('fim_de_turno')
-    #     dados.parado += 0
-    # if request.POST.get('setup'):
-    #     mParada.setup = request.POST.get('setup')
-    #     dados.parado += calcula(dados.parada, dados.retomada)
-    # if request.POST.get('outros'):
-    #     mParada.outros = request.POST.get('outros')
-    #     dados.parado += calcula(dados.parada, dados.retomada)
 
+    dados = Etapa.objects.get(id=id)
     dados.status = '8'
     dados.mostrar = '1'
     dados.parada = timezone.now()  #salva o tempo da parada
@@ -267,21 +253,37 @@ def atualisa_status(request):
         dados.retomada = timezone.now()                      #Atualiza o tempo atual
         dados.decorrido = calcula(dados.inicio, dados.parada) - dados.parado
         dados.parado += calcula(dados.parada, dados.retomada)
-        # mParada = motivoParada.objects.get(id=id_etapa)
-        # mParada.quantidadeParadas += 1
-        # if request.POST.get('almoco'):
-        #     mParada.almoco = request.POST.get('almoco')
-        #     dados.parado += 0
-        # if request.POST.get('fim_de_turno'):
-        #     mParada.fim_de_turno = request.POST.get('fim_de_turno')
-        #     dados.parado += 0
-        # if request.POST.get('setup'):
-        #     mParada.setup = request.POST.get('setup')
-        #     dados.parado += calcula(dados.parada, dados.retomada)
-        # if request.POST.get('outros'):
-        #     mParada.outros = request.POST.get('outros')
-        #     dados.parado += calcula(dados.parada, dados.retomada)
-        # mParada.save()
+
+        motivo_parada = request.POST.get('motivo_parada')
+        dados.quantidadeParadas += 1
+        if motivo_parada == 'almoco':
+            motivo_parada = 'almoço'
+            dados.almoco += 1
+            dados.controleParado += 0
+        if motivo_parada == 'fim_de_turno':
+            motivo_parada = 'final de turno'
+            dados.fim_de_turno += 1
+            dados.controleParado += 0
+        if motivo_parada == 'setup':
+            dados.setup += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+        if motivo_parada == 'faltaMaterial':
+            motivo_parada = 'falta de material'
+            dados.faltaMaterial += 1
+            dados.controleParado += 0
+        if motivo_parada == 'quebraFerramenta':
+            motivo_parada = 'quebra de ferramenta'
+            dados.quebraFerramenta += 1
+            dados.controleParado += 0
+        if motivo_parada == 'necessidadesPessoais':
+            motivo_parada = 'necessidades pessoais'
+            dados.necessidadesPessoais += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+        if motivo_parada == 'outros':
+            motivo_parada = 'motivos diversos'
+            dados.outros += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+
         dados.status = '5'
         dados.save()
         id_ordem = dados.id_ordem_id
@@ -289,7 +291,7 @@ def atualisa_status(request):
         final.status = '1'
         final.save()
 
-        messages.success(request, "Etapa dois retomada com sucesso.")
+        messages.success(request, f"Etapa dois retomada com sucesso após {motivo_parada}.")
     elif dados.status == '5' and dados.fase == '2' :
         dados.status = '0'
         dados.mostrar = '0'
@@ -347,13 +349,45 @@ def atualisa_status(request):
         dados.retomada = timezone.now()                        #Resgata o tempo da parada
         dados.decorrido = calcula(dados.inicio, dados.parada) - dados.parado
         dados.parado += calcula(dados.parada, dados.retomada)
+
+        motivo_parada = request.POST.get('motivo_parada')
+        dados.quantidadeParadas += 1
+        if motivo_parada == 'almoco':
+            motivo_parada = 'almoço'
+            dados.almoco += 1
+            dados.controleParado += 0
+        if motivo_parada == 'fim_de_turno':
+            motivo_parada = 'final de turno'
+            dados.fim_de_turno += 1
+            dados.controleParado += 0
+        if motivo_parada == 'setup':
+            dados.setup += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+        if motivo_parada == 'faltaMaterial':
+            motivo_parada = 'falta de material'
+            dados.faltaMaterial += 1
+            dados.controleParado += 0
+        if motivo_parada == 'quebraFerramenta':
+            motivo_parada = 'quebra de ferramenta'
+            dados.quebraFerramenta += 1
+            dados.controleParado += 0
+        if motivo_parada == 'necessidadesPessoais':
+            motivo_parada = 'necessidades pessoais'
+            dados.necessidadesPessoais += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+        if motivo_parada == 'outros':
+            motivo_parada = 'motivos diversos'
+            dados.outros += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+
         dados.status = '5'
         dados.save()
         id_ordem = dados.id_ordem_id
         final = Ordem.objects.get(base_ptr_id=id_ordem)
         final.status = '1'
         final.save()
-        messages.success(request, "Etapa três retomada com sucesso.")
+    
+        messages.success(request, f"Etapa três retomada com sucesso após {motivo_parada}.")
     elif dados.status == '5' and dados.fase == '3' :
         dados.status = '0'
         dados.mostrar = '0'

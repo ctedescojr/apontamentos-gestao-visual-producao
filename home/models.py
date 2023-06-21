@@ -131,7 +131,9 @@ class Etapa(Base):
     retomada = models.DateTimeField(blank=True, null=True)
     fim = models.DateTimeField(blank=True, null=True)
     decorrido = models.IntegerField(default=0)
-    parado = models.IntegerField(default=0)
+    quantidadeParadas = models.IntegerField(default=0, verbose_name='Quantiadade de Paradas')
+    parado = models.IntegerField(default=0, verbose_name='Total Parado Bruto')
+    controleParado = models.IntegerField(default=0, verbose_name='Total Parado Efetivo')
     limpesa = models.CharField(choices=(
         ('S', 'Sim'),
         ('N', 'Não'),
@@ -178,33 +180,10 @@ class Etapa(Base):
         ('3', 'Final'),
     ), max_length=1, default='0')
     obs_etapa = models.TextField(default='Nada')
-
-class motivoParada(models.Model):
-    mParada = models.CharField(verbose_name='Motivo de Parada', max_length=150)
-
-    class Meta:
-        ordering = ['mParada']
-        verbose_name = 'Motivo de Parada'
-    id_ordem = models.ForeignKey(Ordem, on_delete=models.CASCADE, editable=False)
-    id_etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE, editable=False)
-    quantidadeParadas = models.IntegerField(default=0)
-    almoco = models.CharField(choices=(
-        ('S', 'Sim'),
-        ('N', 'Não'),
-    ), max_length=1, default='N')
-    fim_de_turno = models.CharField(choices=(
-        ('S', 'Sim'),
-        ('N', 'Não'),
-    ), max_length=1, default='N')
-    setup = models.CharField(choices=(
-        ('S', 'Sim'),
-        ('N', 'Não'),
-    ), max_length=1, default='N')
-    outros = models.CharField(choices=(
-        ('S', 'Sim'),
-        ('N', 'Não'),
-    ), max_length=1, default='N')
-    
-
-    def __str__(self):
-        return self.mParada
+    almoco = models.IntegerField(default=0)
+    fim_de_turno = models.IntegerField(default=0)
+    setup = models.IntegerField(default=0)
+    faltaMaterial = models.IntegerField(default=0)
+    quebraFerramenta = models.IntegerField(default=0)
+    necessidadesPessoais = models.IntegerField(default=0)
+    outros = models.IntegerField(default=0)

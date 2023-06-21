@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 
-from .models import Modelo, Tempo, Etapa, Ordem, Funcionario, osnumero, motivoParada
+from .models import Modelo, Tempo, Etapa, Ordem, Funcionario, osnumero
 
 
 @admin.register(osnumero)
@@ -23,14 +23,6 @@ class CursoAdmin(admin.ModelAdmin):
     list_editable = ('modelo',)
     list_per_page = 20
     search_fields = ('modelo',)
-
-@admin.register(motivoParada)
-class CursoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'mParada')
-    list_editable = ('mParada',)
-    list_per_page = 20
-    search_fields = ('mParada',)
-
 
 @admin.register(Tempo)
 class AvaliacaoAdmin(admin.ModelAdmin):
@@ -88,9 +80,15 @@ class AvaliacaoAdmin(admin.ModelAdmin):
 @admin.register(Etapa)
 class AvaliacaoAdmin(admin.ModelAdmin):
     list_display = (
-    'id', 'os_ordem', 'fase', 'media', 'inicio', 'parada', 'retomada', 'fim', 'decorrido', 'parado', 'operador', 'limpesa', 'conserto', 'caixa_sup',
-    'caixa_inf', 'elemento', 'bocal', 'rad_novo', 'mostrar', 'status', 'colmeia'
+    'id', 'os_ordem', 'fase', 'media', 'inicio', 'parada', 'retomada', 'fim', 'decorrido', 'get_tempo_parado', 'operador', 'limpesa', 'conserto', 'caixa_sup',
+    'caixa_inf', 'elemento', 'bocal', 'rad_novo', 'colmeia', 'mostrar', 'status'
     )
     list_display_links = ('fase',)
     date_hierarchy = 'inicio'
     list_per_page = 15
+    exclude = ('almoco', 'fim_de_turno', 'setup', 'faltaMaterial', 'quebraFerramenta', 'necessidadesPessoais', 'outros')
+
+    def get_tempo_parado(self, obj):
+        return obj.controleParado
+
+    get_tempo_parado.short_description = 'Parado'

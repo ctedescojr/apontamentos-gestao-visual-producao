@@ -78,7 +78,6 @@
                     Concluir Etapa 2
                 </button>
                 <a class="btn btn-warning btn-lg" href="{% url 'parar' linhas.meuid %}">Pausar</a>
-                </button>
                 {% endif %}
                 
                 {% if linhas.status == '6' %}
@@ -116,17 +115,17 @@
                 {% endif %}
 
                 {% if linhas.status == '8' %}
-                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
-                        data-bs-target="#exampleModal"
+                <button onclick="Mudarestado()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#retomarModal"
                         data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
                     Retomar Etapa
                 </button>
                 {% endif %}
-
+                
             </td>
             <td style="display: none">{{linhas.status}}</td>
-            <td style="display: -moz-box">{{linhas.decorrido}}</td>
-            <td style="display: -moz-box">{{linhas.parado}}</td>
+            <td style="display: none">{{linhas.decorrido}}</td>
+            <td style="display: none">{{linhas.parado}}</td>
         </tr>
         {% endif %}
         {% endfor %}
@@ -150,16 +149,12 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-
-
                         <!--                        outro-->
                         <div style="text-align: center">
                             {{linhas.nome}}
                             <img src="{% static 'images/04.png' %}" alt=""><BR>
                             Confirma sua ação para:
                             <h5 class="modal-title" id="exampleModalLabel">New message</h5>
-
-
                         </div>
                         <div id="mostrar" style="font-size: 1.6rem">
                             <!--                            id geral-->
@@ -207,22 +202,84 @@
                             </div>
 
                         </div>
-                        
                     </div>
                     <button type="submit" class="btn btn-success btn-lg w-75">Confirmar</button>
                     <button type="button" class="btn btn-warning btn-lg" data-bs-dismiss="modal">Cancelar</button>
-
                 </div>
+            </div>
+        </div>
+    </form>
+</div>
 
+<div class="modal fade" id="retomarModal" tabindex="-1" aria-labelledby="retomarModalLabel" aria-hidden="true">
+    <form method="post" action="{% url 'start' %}">{{ csrf_input }}
+        {% csrf_token %}
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Motivo de Parada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <!--                        outro-->
+                        <div style="text-align: center">
+                            {{linhas.nome}}
+                            <img src="{% static 'images/04.png' %}" alt=""><BR>
+                            Identificar o motivo de parada para:
+                            <h5 class="modal-title" id="retomarModalLabel">New message</h5>
+                        </div>
+                        <div id="mostrar" style="font-size: 1.6rem">
+                            <!--                            id geral-->
+                            <input type="hidden" name="idetapa" class="form-control" id="recipient-name">
+                            <!--                            dados da ação-->
+                            <div class="form-check">
+                                <input value="almoco" name="motivo_parada" class="form-check-input" type="radio"
+                                       id="motivoParadaAlmoco">
+                                <label class="form-check-label" for="motivoParadaAlmoco">Almoço</label>
+                            </div>
+                            <div class="form-check">
+                                <input value="fim_de_turno" name="motivo_parada" class="form-check-input" type="radio"
+                                       id="motivoParadaFimDeTurno">
+                                <label class="form-check-label" for="motivoParadaFimDeTurno">Fim de Turno</label>
+                            </div>
+                            <div class="form-check">
+                                <input value="setup" name="motivo_parada" class="form-check-input" type="radio"
+                                       id="motivoParadaSetup">
+                                <label class="form-check-label" for="motivoParadaSetup">Setup</label>
+                            </div>
+                            <div class="form-check">
+                                <input value="faltaMaterial" name="motivo_parada" class="form-check-input" type="radio"
+                                       id="motivoParadaFaltaMaterial">
+                                <label class="form-check-label" for="motivoParadaFaltaMaterial">Falta de Material</label>
+                            </div>
+                            <div class="form-check">
+                                <input value="quebraFerramenta" name="motivo_parada" class="form-check-input" type="radio"
+                                       id="motivoParadaQuebraFerramenta">
+                                <label class="form-check-label" for="motivoParadaQuebraFerramenta">Quebra de Ferramenta</label>
+                            </div>
+                            <div class="form-check">
+                                <input value="necessidadesPessoais" name="motivo_parada" class="form-check-input" type="radio"
+                                       id="motivoParadaNecessidadesPessoais">
+                                <label class="form-check-label" for="motivoParadaNecessidadesPessoais">Necessidades Pessoais</label>
+                            </div>
+                            <div class="form-check">
+                                <input value="outros" name="motivo_parada" class="form-check-input" type="radio"
+                                       id="motivoParadaOutros">
+                                <label class="form-check-label" for="motivoParadaOutros">Outros</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg w-75">Confirmar</button>
+                    <button type="button" class="btn btn-warning btn-lg" data-bs-dismiss="modal">Cancelar</button>
+                </div>
             </div>
         </div>
     </form>
 </div>
 
 <script type="text/javascript">
-
 </script>
-
 
 </body>
 <script>
@@ -248,15 +305,6 @@
         }
     }
 
-    function Mudarestadoparada(el) {
-        var mostrar = document.getElementById('mostrar').style.display;
-
-        if (mostrar == "none") {
-            document.getElementById('mostrar').style.display = 'block';
-        }
-
-    }
-
     var exampleModal = document.getElementById('exampleModal')
     exampleModal.addEventListener('show.bs.modal', function (event) {
         // Button that triggered the modal
@@ -273,7 +321,23 @@
 
         modalTitle.textContent = recipient2
         modalBodyInput.value = recipient
+    })
+
+    var retomarModal = document.getElementById('retomarModal')
+    retomarModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        var recipient = button.getAttribute('data-bs-whatever')
+        var recipient2 = button.getAttribute('data2-bs-whatever')
+
+        var modalTitle = retomarModal.querySelector('.modal-title')
+        var modalBodyInput = retomarModal.querySelector('.modal-body input')
+        var x = retomarModal.querySelector('.modal-body .x')
+        var m = retomarModal.querySelector('.modal-body .mostrar_form')
 
 
+        modalTitle.textContent = recipient2
+        modalBodyInput.value = recipient
     })
 </script>
