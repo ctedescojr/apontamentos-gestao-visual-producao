@@ -63,7 +63,7 @@
                 {% endif %}
 
                 {% if linhas.status == '1' %}
-                <button onclick="Mudarestado()" type="button" class="btn btn-warning btn-lg " data-bs-toggle="modal"
+                <button onclick="Mudarestado()" type="button" class="btn btn-success btn-lg" data-bs-toggle="modal"
                         data-bs-target="#exampleModal"
                         data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}}">
                     Concluir Etapa 1
@@ -107,6 +107,15 @@
 
                 {% if linhas.status == '5' %}
                 <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Finalizar Após Parada
+                </button>
+                <a class="btn btn-warning btn-lg" href="{% url 'parar' linhas.meuid %}">Pausar</a>
+                {% endif %}
+
+                {% if linhas.status == '7' %}
+                <button onclick="Mudarestado()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
                         data-bs-target="#exampleModal"
                         data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
                     Finalizar Após Parada

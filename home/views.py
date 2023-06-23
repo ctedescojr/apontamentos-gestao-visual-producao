@@ -61,6 +61,15 @@ def enviaEmail(etapa, numero, ordem, et):
                     f'Observações Ordem: {ordem.obs_ordem}\n\n'
                     f'Observações Etapa: {et.obs_etapa}')
         msg.set_content(mensagem)
+    if str(etapa) == '6':
+        msg['Subject'] = f'Radiador novo - OS {numero}'
+        mensagem = (f'O radiador, OS nº {numero} foi finalizado, fabricação concluída.\n'
+                    f'Cliente: {ordem.cliente}\n'
+                    f'Modelo: {ordem.modelo}\n'
+                    f'Tipo de Serviço: {ordem.get_tipo_display()}\n\n'
+                    f'Observações Ordem: {ordem.obs_ordem}\n\n'
+                    f'Observações Etapa: {et.obs_etapa}')
+        msg.set_content(mensagem)
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(EMAIL_ADREE, SENHA_ADREE)
@@ -179,6 +188,7 @@ def atualisa_status(request):
             final = Ordem.objects.get(base_ptr_id=id_ordem)
             final.status = '3'
             final.data_entrega = timezone.now()
+            enviaEmail('6', final.numeros,final, dados)
             final.save()
 
             id_ordem = dados.id_ordem_id
@@ -208,6 +218,131 @@ def atualisa_status(request):
             final.save()
 
             messages.success(request, "Primeira etapa finalizada com sucesso.")
+            enviaEmail('2', final.numeros,final, dados)
+
+    #Rotina de quando há uma parada na etapa 1    
+    elif dados.status == '8' and dados.fase == '1' :    #Quando houver uma parada
+        dados.retomada = timezone.now()                      #Atualiza o tempo atual
+        dados.decorrido = calcula(dados.inicio, dados.parada) - dados.parado
+        dados.parado += calcula(dados.parada, dados.retomada)
+
+        motivo_parada = request.POST.get('motivo_parada')
+        dados.quantidadeParadas += 1
+        if motivo_parada == 'almoco':
+            motivo_parada = 'almoço'
+            dados.almoco += 1
+            dados.controleParado += 0
+        if motivo_parada == 'fim_de_turno':
+            motivo_parada = 'final de turno'
+            dados.fim_de_turno += 1
+            dados.controleParado += 0
+        if motivo_parada == 'setup':
+            dados.setup += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+        if motivo_parada == 'faltaMaterial':
+            motivo_parada = 'falta de material'
+            dados.faltaMaterial += 1
+            dados.controleParado += 0
+        if motivo_parada == 'quebraFerramenta':
+            motivo_parada = 'quebra de ferramenta'
+            dados.quebraFerramenta += 1
+            dados.controleParado += 0
+        if motivo_parada == 'necessidadesPessoais':
+            motivo_parada = 'necessidades pessoais'
+            dados.necessidadesPessoais += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+        if motivo_parada == 'outros':
+            motivo_parada = 'motivos diversos'
+            dados.outros += 1
+            dados.controleParado += calcula(dados.parada, dados.retomada)
+
+        dados.status = '7'
+        dados.save()
+        id_ordem = dados.id_ordem_id
+        final = Ordem.objects.get(base_ptr_id=id_ordem)
+        final.status = '1'
+        final.save()
+
+        messages.success(request, f"Etapa um retomada com sucesso após parada por motivo: {motivo_parada}.")
+    elif dados.status == '7' and dados.fase == '1' :
+        dados.status = '0'
+        dados.mostrar = '0'
+        dados.fim = timezone.now()
+
+        if request.POST.get('limpesa'):
+            dados.limpesa = request.POST.get('limpesa')
+        if request.POST.get('conserto'):
+            dados.conserto = request.POST.get('conserto')
+        if request.POST.get('caixasup'):
+            dados.caixa_sup = request.POST.get('caixasup')
+        if request.POST.get('caixainf'):
+            dados.caixa_inf = request.POST.get('caixainf')
+        if request.POST.get('elemento'):
+            dados.elemento = request.POST.get('elemento')
+        if request.POST.get('bocal'):
+            dados.bocal = request.POST.get('bocal')
+        if request.POST.get('radiador'):
+            dados.rad_novo = request.POST.get('radiador')
+        if request.POST.get('colmeia'):
+            dados.colmeia = request.POST.get('colmeia')
+
+        dados.decorrido = calcula(dados.inicio, dados.fim) - dados.parado #Calcula o tempo
+        dados.save()
+        id_ordem = dados.id_ordem_id
+        final = Ordem.objects.get(base_ptr_id=id_ordem)
+        final.status = '2'
+        final.save()
+
+        id_ordem = dados.id_ordem_id
+        final = Etapa.objects.filter(
+            id_ordem_id=id_ordem, fase='2'
+        )
+    #fim da rotina de parada na etapa 1
+
+        # Verifica se o trabalho realizado é um radiador novo e encerra as outras etapas
+        if dados.rad_novo == 'S':
+            messages.success(request, "Radiador novo finalizado!")
+            dados_dois = Etapa.objects.get(base_ptr_id=final[0].id)
+            dados_dois.status = '3'
+            dados_dois.inicio = timezone.now()
+            dados_dois.fim = timezone.now()
+            dados_dois.decorrido = '0'
+            dados_dois.rad_novo = 'S'
+            dados_dois.operador = dados.operador
+            dados_dois.save()
+            final = Ordem.objects.get(base_ptr_id=id_ordem)
+            final.status = '3'
+            final.data_entrega = timezone.now()
+            enviaEmail('6', final.numeros,final, dados)
+            final.save()
+
+            id_ordem = dados.id_ordem_id
+            final = Etapa.objects.filter(
+            id_ordem_id=id_ordem, fase='3'
+        )   
+            dados_tres = Etapa.objects.get(base_ptr_id=final[0].id)
+            dados_tres.status = '3'
+            dados_tres.inicio = timezone.now()
+            dados_tres.fim = timezone.now()
+            dados_tres.decorrido = '0'
+            dados_tres.rad_novo = 'S'
+            dados_tres.operador = dados.operador
+            dados_tres.save()
+            final = Ordem.objects.get(base_ptr_id=id_ordem)
+            final.status = '3'
+            final.data_entrega = timezone.now()
+            final.save()
+
+        else:
+            dados_dois = Etapa.objects.get(base_ptr_id=final[0].id)
+            dados_dois.mostrar = '1'
+            dados_dois.status = '6'
+            dados_dois.save()
+            final = Ordem.objects.get(base_ptr_id=id_ordem)
+            final.status = '2'
+            final.save()
+
+            messages.success(request, "Primeira etapa finalizada com sucesso após parada.")
             enviaEmail('2', final.numeros,final, dados)
 #Fim da rotina da primeira etapa
 
@@ -291,7 +426,7 @@ def atualisa_status(request):
         final.status = '1'
         final.save()
 
-        messages.success(request, f"Etapa dois retomada com sucesso após {motivo_parada}.")
+        messages.success(request, f"Etapa dois retomada com sucesso após parada por motivo: {motivo_parada}.")
     elif dados.status == '5' and dados.fase == '2' :
         dados.status = '0'
         dados.mostrar = '0'
@@ -387,7 +522,7 @@ def atualisa_status(request):
         final.status = '1'
         final.save()
     
-        messages.success(request, f"Etapa três retomada com sucesso após {motivo_parada}.")
+        messages.success(request, f"Etapa três retomada com sucesso após parada por motivo: {motivo_parada}.")
     elif dados.status == '5' and dados.fase == '3' :
         dados.status = '0'
         dados.mostrar = '0'
