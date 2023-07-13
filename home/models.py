@@ -64,6 +64,7 @@ class Ordem(Base):
     cliente = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
     numeros = models.IntegerField(default=1)
+    tem_acessorio = models.BooleanField(default=False)
     tipo = models.CharField(choices=(
         ('N', 'Nova'),
         ('R', 'Retrabalho'),
