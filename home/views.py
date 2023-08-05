@@ -11,12 +11,12 @@ from django.db.models import Count
 
 #Funcão para envio de e-mails seguindo critérios de etapas
 def enviaEmail(etapa, numero, ordem, et):
-    EMAIL_ADREE = 'etapafinalizada@gmail.com'
-    SENHA_ADREE = 'tjwnwnzxgkwkzvlj'
+    EMAIL_ADREE = ''
+    SENHA_ADREE = ''
     msg = EmailMessage()
     
-    msg['From'] = 'etapafinalizada@gmail.com'
-    msg['To'] = 'etapafinalizada@gmail.com'
+    msg['From'] = ''
+    msg['To'] = ''
 
     if str(etapa) == '2':
         msg['Subject'] = f'Status Etapa 1 - OS {numero}'
@@ -122,7 +122,7 @@ def atualisa_status(request):
     id_etapa = int(request.POST.get('idetapa'))
     dados = Etapa.objects.get(id=id_etapa)
 
-    if dados.operador_id == 133:   
+    if dados.operador_id == 3:   
         messages.success(request, "Por favor, indique um operador para iniciar o trabalho.")
         if dados.fase == '2':
             dados.status = '6'
@@ -140,10 +140,10 @@ def atualisa_status(request):
         id_ordem = dados.id_ordem_id
         final = Ordem.objects.get(base_ptr_id=id_ordem)
         final.status = '1'
-        if final.tipo == 'R':
-            enviaEmail('0', final.numeros, final, dados)
-        if final.tipo == 'G':
-            enviaEmail('1', final.numeros, final, dados)
+        # if final.tipo == 'R':
+        #     enviaEmail('0', final.numeros, final, dados)
+        # if final.tipo == 'G':
+        #     enviaEmail('1', final.numeros, final, dados)
         final.save()
     elif dados.status == '1' and dados.fase == '1':
         dados.status = '0'
@@ -188,7 +188,7 @@ def atualisa_status(request):
             final = Ordem.objects.get(base_ptr_id=id_ordem)
             final.status = '3'
             final.data_entrega = timezone.now()
-            enviaEmail('6', final.numeros,final, dados)
+            # enviaEmail('6', final.numeros,final, dados)
             final.save()
 
             id_ordem = dados.id_ordem_id
@@ -218,7 +218,7 @@ def atualisa_status(request):
             final.save()
 
             messages.success(request, "Primeira etapa finalizada com sucesso.")
-            enviaEmail('2', final.numeros,final, dados)
+            # enviaEmail('2', final.numeros,final, dados)
 
     #Rotina de quando há uma parada na etapa 1    
     elif dados.status == '8' and dados.fase == '1' :    #Quando houver uma parada
@@ -313,7 +313,7 @@ def atualisa_status(request):
             final = Ordem.objects.get(base_ptr_id=id_ordem)
             final.status = '3'
             final.data_entrega = timezone.now()
-            enviaEmail('6', final.numeros,final, dados)
+            # enviaEmail('6', final.numeros,final, dados)
             final.save()
 
             id_ordem = dados.id_ordem_id
@@ -343,7 +343,7 @@ def atualisa_status(request):
             final.save()
 
             messages.success(request, "Primeira etapa finalizada com sucesso após parada.")
-            enviaEmail('2', final.numeros,final, dados)
+            # enviaEmail('2', final.numeros,final, dados)
 #Fim da rotina da primeira etapa
 
 #Início da rotina da segunda etapa    
@@ -380,7 +380,7 @@ def atualisa_status(request):
         dados_tres.save()
         final = Ordem.objects.get(base_ptr_id=id_ordem)
         messages.success(request, "Etapa três disponível.")
-        enviaEmail('5', final.numeros, final, dados)
+        # enviaEmail('5', final.numeros, final, dados)
     #Fim da rotina da segunda etapa sem pausa
 
     #Rotina de quando há uma parada na etapa 2    
@@ -449,7 +449,7 @@ def atualisa_status(request):
         dados_tres.save()
         final = Ordem.objects.get(base_ptr_id=id_ordem)
         messages.success(request, "Etapa três disponível após parada.")
-        enviaEmail('5', final.numeros, final, dados)
+        # enviaEmail('5', final.numeros, final, dados)
     #fim da rotina de parada na etapa 2
 #Fim da rotina a segunda etapa
 
@@ -476,7 +476,7 @@ def atualisa_status(request):
         final.data_entrega = timezone.now()
         final.save()
         messages.success(request, "Finalizado.")
-        enviaEmail('3', final.numeros, final, dados)
+        # enviaEmail('3', final.numeros, final, dados)
     #Fim da rotina da terceira etapa sem pausa
 
     #Rotina de quando há uma parada na etapa 3    
@@ -535,7 +535,7 @@ def atualisa_status(request):
         final.status = '3'
         final.save()
         messages.success(request, "Finalizado após parada.")
-        enviaEmail('3', final.numeros, final, dados)
+        # enviaEmail('3', final.numeros, final, dados)
     #fim da rotina de parada na etapa 3
 #Fim da rotina da terceira etapa
     else:

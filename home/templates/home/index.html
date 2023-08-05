@@ -71,7 +71,16 @@
                 <a class="btn btn-warning btn-lg" href="{% url 'parar' linhas.meuid %}">Pausar</a>
                 {% endif %}
                 
-                {% if linhas.status == '2' %}
+                {% if linhas.status == '2' and linhas.tem_acessorio %}
+                <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
+                        data-bs-target="#acessorioModal"
+                        data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
+                    Concluir Etapa 2
+                </button>
+                <a class="btn btn-warning btn-lg" href="{% url 'parar' linhas.meuid %}">Pausar</a>
+                {% endif %}
+
+                {% if linhas.status == '2' and not linhas.tem_acessorio %}
                 <button onclick="esconder()" type="button" class="btn btn-success btn-lg " data-bs-toggle="modal"
                         data-bs-target="#exampleModal"
                         data-bs-whatever="{{linhas.meuid}}" data2-bs-whatever="{{linhas.carro}} Etapa {{linhas.fase}}">
@@ -287,6 +296,38 @@
     </form>
 </div>
 
+<div class="modal fade" id="acessorioModal" tabindex="-1" aria-labelledby="acessorioModalLabel" aria-hidden="true">
+    <form method="post" action="{% url 'start' %}">{{ csrf_input }}
+        {% csrf_token %}
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>ALERTA!!!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <!--                        outro-->
+                        <div style="text-align: center">
+                            {{linhas.nome}}
+                            <img src="{% static 'images/alert200.png' %}" alt=""><BR>
+                            NÃO ESQUECER O ACESSÓRIO PARA:
+                            <h5 class="modal-title" id="acessorioModalLabel">New message</h5>
+                        </div>
+                        <div id="mostrar" style="font-size: 1.6rem">
+                            <!--                            id geral-->
+                            <input type="hidden" name="idetapa" class="form-control" id="recipient-name">
+                            <!--                            dados da ação-->
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-lg w-75">Confirmar</button>
+                    <button type="button" class="btn btn-warning btn-lg" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 <script type="text/javascript">
 </script>
 
@@ -344,6 +385,24 @@
         var modalBodyInput = retomarModal.querySelector('.modal-body input')
         var x = retomarModal.querySelector('.modal-body .x')
         var m = retomarModal.querySelector('.modal-body .mostrar_form')
+
+
+        modalTitle.textContent = recipient2
+        modalBodyInput.value = recipient
+    })
+
+    var acessorioModal = document.getElementById('acessorioModal')
+    acessorioModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        var recipient = button.getAttribute('data-bs-whatever')
+        var recipient2 = button.getAttribute('data2-bs-whatever')
+
+        var modalTitle = acessorioModal.querySelector('.modal-title')
+        var modalBodyInput = acessorioModal.querySelector('.modal-body input')
+        var x = acessorioModal.querySelector('.modal-body .x')
+        var m = acessorioModal.querySelector('.modal-body .mostrar_form')
 
 
         modalTitle.textContent = recipient2

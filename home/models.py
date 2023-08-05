@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.forms import CheckboxInput
 
 
 class Base(models.Model):
@@ -64,7 +64,7 @@ class Ordem(Base):
     cliente = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
     numeros = models.IntegerField(default=1)
-    tem_acessorio = models.BooleanField(default=False)
+    tem_acessorio = models.BooleanField(default=False, verbose_name="Tem acessório?")
     tipo = models.CharField(choices=(
         ('N', 'Nova'),
         ('R', 'Retrabalho'),
