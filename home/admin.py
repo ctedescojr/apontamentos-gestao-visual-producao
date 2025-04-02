@@ -1,16 +1,15 @@
 from django.contrib import admin
-from django.utils import timezone
 
 from .models import Modelo, Tempo, Etapa, Ordem, Funcionario, osnumero
 
 
 @admin.register(osnumero)
-class AvaliacaoAdmin(admin.ModelAdmin):
+class OSNumeroAdmin(admin.ModelAdmin):
     list_display = ("id", "numero")
 
 
 @admin.register(Funcionario)
-class AvaliacaoAdmin(admin.ModelAdmin):
+class Funcionarioadmin(admin.ModelAdmin):
     list_display = ("id", "nome", "contato", "tipo")
     list_editable = ("nome",)
     list_per_page = 20
@@ -18,7 +17,7 @@ class AvaliacaoAdmin(admin.ModelAdmin):
 
 
 @admin.register(Modelo)
-class CursoAdmin(admin.ModelAdmin):
+class ModeloAdmin(admin.ModelAdmin):
     list_display = ("id", "modelo")
     list_editable = ("modelo",)
     list_per_page = 20
@@ -26,7 +25,7 @@ class CursoAdmin(admin.ModelAdmin):
 
 
 @admin.register(Tempo)
-class AvaliacaoAdmin(admin.ModelAdmin):
+class TempoAdmin(admin.ModelAdmin):
     list_display = ("id", "modelo", "etapa", "media")
     list_per_page = 20
     search_fields = ("modelo",)
@@ -89,7 +88,7 @@ class OrdemAdmin(admin.ModelAdmin):
 
 
 @admin.register(Etapa)
-class AvaliacaoAdmin(admin.ModelAdmin):
+class EtapaAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "os_ordem",
